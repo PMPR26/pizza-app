@@ -26,7 +26,8 @@ class StorePizzaRequest extends FormRequest
             'name'=>'required|string|max:255',
             'description'=>'required|string|max:255',
             'price'=>'required|numeric|min:0',
-            'image'=>'required|string',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:4096|required_without:image_url',
+            'image_url' => 'nullable|url|required_without:image',
             'ingredients'=>'required|array',
             'ingredients.*'=>'required|exists:ingredients,id',
         ];

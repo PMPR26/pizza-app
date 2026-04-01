@@ -5,6 +5,7 @@ use App\Http\Requests\StoreOrderRequest;
 use Illuminate\Http\Request;
 use App\Models\Order;
 use App\Models\Pizza;
+use App\Events\OrderCreated;
 
 class OrderController extends Controller
 {
@@ -17,8 +18,9 @@ class OrderController extends Controller
             'total' => $pizza->price * $request->quantity,
             'ordered_at' => now(),
         ]);
-         // Job de email temporalmente desactivado
-        // SendOrderEmailJob::dispatch($order);
+
+        $order->load(['pizza.ingredients', 'user']);
+        OrderCreated::dispatch($order);
 
         return response()->json([
             'message' => 'Pedido creado correctamente',

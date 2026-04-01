@@ -26,7 +26,8 @@ class UpdatePizzaRequest extends FormRequest
             'name' => 'sometimes|string|max:255',
             'description' => 'sometimes|string|max:255',
             'price' => 'sometimes|numeric|min:0',
-            'image' => 'sometimes|string',
+            'image' => 'sometimes|nullable|image|mimes:jpg,jpeg,png,webp|max:4096',
+            'image_url' => 'sometimes|nullable|url',
             'ingredients' => 'sometimes|array',
             'ingredients.*' => 'exists:ingredients,id',
         ];
