@@ -29,6 +29,16 @@ export interface Order {
   quantity: number
   total: number
   ordered_at: string
+  checkout_group_id?: string | null
   pizza?: Pizza
   user?: User
+}
+
+export interface EditingPizza {
+  id: number
+  name: string
+  description: string
+  price: number
+  image: string
+  ingredientIds: number[]
 }

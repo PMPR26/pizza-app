@@ -1,100 +1,160 @@
-import { computed, ref } from 'vue'
+import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
 import { api } from '@/services/api'
-import type { Order, Pizza } from '@/types'
-
-interface CartItem {
-  pizza: Pizza
-  quantity: number
-}
+import type { Pizza, Ingredient, Order, EditingPizza } from '@/types'
 
 export const useShopStore = defineStore('shop', () => {
+  // Estado
   const pizzas = ref<Pizza[]>([])
-  const orders = ref<Order[]>([])
-  const cart = ref<CartItem[]>([])
+  const adminOrders = ref<Order[]>([])
+  const myOrders = ref<Order[]>([])
+  const cart = ref<{ pizza: Pizza; quantity: number }[]>([])
+
   const loading = ref(false)
+  const errorMessage = ref('')
+  const successMessage = ref('')
 
-  const cartCount = computed(() => cart.value.reduce((acc, item) => acc + item.quantity, 0))
-  const cartTotal = computed(() =>
-    cart.value.reduce((acc, item) => acc + Number(item.pizza.price) * item.quantity, 0),
-  )
+  // Computed
+  const pizzasCount = computed(() => pizzas.value.length)
+  const ordersCount = computed(() => adminOrders.value.length)
+  const cartTotal = computed(() => cart.value.reduce((total, item) => total + (item.pizza.price * item.quantity), 0))
+  const cartCount = computed(() => cart.value.reduce((count, item) => count + item.quantity, 0))
 
+  // Fetchers
   async function fetchPizzas() {
     loading.value = true
+    errorMessage.value = ''
     try {
-      const { data } = await api.get<Pizza[]>('/pizzas')
-      pizzas.value = data
+      const { data: response } = await api.get<any>('/pizzas')
+      pizzas.value = response.data || response
+    } catch (err: any) {
+      errorMessage.value = err?.response?.data?.message || 'Error al cargar pizzas'
     } finally {
       loading.value = false
     }
   }
 
-  async function fetchMyOrder(orderId: number) {
-    const { data } = await api.get<Order>(`/orders/${orderId}`)
-    return data
-  }
-
   async function fetchAllOrders() {
-    const { data } = await api.get<Order[]>('/orders')
-    orders.value = data
+    loading.value = true
+    errorMessage.value = ''
+    try {
+      const { data: response } = await api.get<any>('/orders')
+      adminOrders.value = response.data || response
+    } catch (err: any) {
+      errorMessage.value = err?.response?.data?.message || 'Error al cargar pedidos'
+    } finally {
+      loading.value = false
+    }
   }
 
-  function addToCart(pizza: Pizza) {
-    const existing = cart.value.find((item) => item.pizza.id === pizza.id)
-    if (existing) {
-      existing.quantity += 1
-      return
+  async function fetchMyOrders() {
+    loading.value = true
+    errorMessage.value = ''
+    try {
+      const { data: response } = await api.get<any>('/my-orders')
+      const orders = response.data || response
+      myOrders.value = orders
+      return orders
+    } catch (err: any) {
+      errorMessage.value = err?.response?.data?.message || 'Error al cargar mis pedidos'
+      return []
+    } finally {
+      loading.value = false
     }
-    cart.value.push({ pizza, quantity: 1 })
+  }
+
+  async function fetchAllData() {
+    loading.value = true
+    errorMessage.value = ''
+    try {
+      await Promise.all([fetchPizzas(), fetchAllOrders()])
+    } catch {
+      errorMessage.value = 'Error al cargar datos'
+    } finally {
+      loading.value = false
+    }
+  }
+
+  // Cart functions
+  function addToCart(pizza: Pizza) {
+    const existing = cart.value.find(item => item.pizza.id === pizza.id)
+    if (existing) {
+      existing.quantity++
+    } else {
+      cart.value.push({ pizza, quantity: 1 })
+    }
   }
 
   function removeFromCart(pizzaId: number) {
-    cart.value = cart.value.filter((item) => item.pizza.id !== pizzaId)
+    cart.value = cart.value.filter(item => item.pizza.id !== pizzaId)
   }
 
   function incrementQuantity(pizzaId: number) {
-    const item = cart.value.find((i) => i.pizza.id === pizzaId)
-    if (item) {
-      item.quantity += 1
-    }
+    const item = cart.value.find(item => item.pizza.id === pizzaId)
+    if (item) item.quantity++
   }
 
   function decrementQuantity(pizzaId: number) {
-    const item = cart.value.find((i) => i.pizza.id === pizzaId)
-    if (!item) return
-    if (item.quantity <= 1) {
+    const item = cart.value.find(item => item.pizza.id === pizzaId)
+    if (item && item.quantity > 1) {
+      item.quantity--
+    } else {
       removeFromCart(pizzaId)
-      return
     }
-    item.quantity -= 1
   }
 
   async function placeOrder() {
-    const requests = cart.value.map((item) =>
-      api.post('/orders', {
-        pizza_id: item.pizza.id,
-        quantity: item.quantity,
-      }),
-    )
-    const responses = await Promise.all(requests)
-    orders.value = responses.map((response) => response.data.order as Order)
-    cart.value = []
+    if (!cart.value.length) throw new Error('El carrito está vacío')
+
+    loading.value = true
+    errorMessage.value = ''
+    try {
+      await api.post('/orders/checkout', {
+        items: cart.value.map(item => ({
+          pizza_id: item.pizza.id,
+          quantity: item.quantity,
+        })),
+      })
+      cart.value = [] // Vaciar carrito después de ordenar
+      successMessage.value = 'Pedido realizado correctamente'
+    } catch (err: any) {
+      errorMessage.value = err?.response?.data?.message || 'Error al realizar el pedido'
+      throw err
+    } finally {
+      loading.value = false
+    }
+  }
+
+  function clearErrorMessage() {
+    errorMessage.value = ''
+  }
+
+  function clearSuccessMessage() {
+    successMessage.value = ''
   }
 
   return {
     pizzas,
-    orders,
+    adminOrders,
+    myOrders,
     cart,
     loading,
-    cartCount,
+    errorMessage,
+    successMessage,
+    pizzasCount,
+    ordersCount,
     cartTotal,
+    cartCount,
     fetchPizzas,
-    fetchMyOrder,
     fetchAllOrders,
+    fetchMyOrders,
+    fetchAllData,
     addToCart,
     removeFromCart,
     incrementQuantity,
     decrementQuantity,
     placeOrder,
+    clearErrorMessage,
+    clearSuccessMessage,
   }
 })

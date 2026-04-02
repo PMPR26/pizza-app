@@ -2,7 +2,6 @@
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import PizzaCard from '@/components/PizzaCard.vue'
-import CartPanel from '@/components/CartPanel.vue'
 import { useShopStore } from '@/stores/shop'
 import { useAuthStore } from '@/stores/auth'
 import type { Pizza } from '@/types'
@@ -14,9 +13,7 @@ const message = ref('')
 const error = ref('')
 
 onMounted(() => {
-  if (!shop.pizzas.length) {
-    shop.fetchPizzas()
-  }
+  shop.fetchPizzas()
 })
 
 function addToCart(pizza: Pizza) {
@@ -67,6 +64,72 @@ async function checkout() {
       </div>
     </div>
 
-    <CartPanel @checkout="checkout" />
+    <aside class="lg:sticky lg:top-6 lg:self-start">
+      <div class="cart-panel">
+        <h2 class="cart-panel__title">Carrito</h2>
+
+        <p v-if="!shop.cart.length" class="cart-panel__empty">
+          Aún no hay pizzas. Agrega alguna desde el menú.
+        </p>
+
+        <ul v-else class="space-y-3">
+          <li
+            v-for="item in shop.cart"
+            :key="item.pizza.id"
+            class="cart-panel__item"
+          >
+            <div class="cart-panel__item-header">
+              <span class="cart-panel__item-name">{{ item.pizza.name }}</span>
+              <button
+                type="button"
+                class="cart-panel__remove-btn"
+                @click="shop.removeFromCart(item.pizza.id)"
+              >
+                Quitar
+              </button>
+            </div>
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <div class="cart-panel__quantity-control">
+                <button
+                  type="button"
+                  class="cart-panel__quantity-btn"
+                  aria-label="Menos"
+                  @click="shop.decrementQuantity(item.pizza.id)"
+                >
+                  −
+                </button>
+                <span class="cart-panel__quantity-number">{{ item.quantity }}</span>
+                <button
+                  type="button"
+                  class="cart-panel__quantity-btn"
+                  aria-label="Más"
+                  @click="shop.incrementQuantity(item.pizza.id)"
+                >
+                  +
+                </button>
+              </div>
+              <span class="cart-panel__item-total">
+                {{ (item.pizza.price * item.quantity).toFixed(2) }} Bs
+              </span>
+            </div>
+          </li>
+        </ul>
+
+        <div v-if="shop.cart.length" class="cart-panel__total mt-4 flex items-center justify-between">
+          <span>Total ({{ shop.cartCount }} {{ shop.cartCount === 1 ? 'artículo' : 'artículos' }})</span>
+          <span class="cart-panel__total-value">{{ shop.cartTotal.toFixed(2) }} Bs</span>
+        </div>
+
+        <button
+          v-if="shop.cart.length"
+          type="button"
+          class="cart-panel__checkout-btn mt-4"
+          :disabled="shop.loading"
+          @click="checkout"
+        >
+          {{ auth.isAuthenticated ? 'Confirmar pedido' : 'Iniciar sesión para pedir' }}
+        </button>
+      </div>
+    </aside>
   </section>
 </template>

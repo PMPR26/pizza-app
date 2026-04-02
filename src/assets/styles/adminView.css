@@ -1,0 +1,92 @@
+/* adminView.css - Estilos desacoplados para AdminView */
+
+.admin-view {
+  width: 100%;
+  padding: var(--space-lg);
+}
+
+.admin-view__header {
+  margin-bottom: var(--space-xl);
+  padding-bottom: var(--space-lg);
+  border-bottom: 2px solid var(--color-cyan-pastel);
+}
+
+.admin-view__title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #111827;
+  letter-spacing: -0.025em;
+}
+
+.admin-view__subtitle {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin-top: 0.25rem;
+  font-weight: 500;
+}
+
+.admin-view__nav {
+  display: flex;
+  gap: var(--space-md);
+  margin-bottom: var(--space-xl);
+  flex-wrap: wrap;
+}
+
+.admin-view__content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xl);
+}
+
+.admin-view__section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+.admin-view__section-nav {
+  display: flex;
+  gap: var(--space-md);
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: var(--space-md);
+}
+
+.admin-view__form {
+  background-color: #fafafa;
+  border: 1px solid #e5e7eb;
+  border-radius: var(--border-radius);
+  padding: var(--space-lg);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .admin-view {
+    padding: var(--space-md);
+  }
+
+  .admin-view__nav {
+    flex-direction: column;
+  }
+
+  .admin-view__nav .btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-view {
+    padding: var(--space-sm);
+  }
+
+  .admin-view__title {
+    font-size: 1.75rem;
+  }
+
+  .admin-view__section-nav {
+    flex-direction: column;
+  }
+
+  .admin-view__section-nav .btn {
+    width: 100%;
+  }
+}

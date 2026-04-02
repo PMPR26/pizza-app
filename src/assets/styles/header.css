@@ -1,0 +1,42 @@
+@reference "../../style.css";
+
+.app-header {
+  @apply sticky top-0 z-40 border-b border-gray-200 bg-white/95 shadow-sm backdrop-blur;
+}
+
+.app-header__container {
+  @apply mx-auto flex max-w-6xl items-center justify-between px-4 py-3;
+}
+
+.app-header__brand {
+  @apply text-lg font-bold text-[#D32F2F];
+}
+
+.app-header__nav {
+  @apply flex items-center gap-4 text-sm font-medium text-gray-700;
+}
+
+.app-header__link {
+  @apply transition hover:text-[#D32F2F];
+}
+
+.app-header__actions {
+  @apply flex items-center gap-3;
+}
+
+.app-header__cart-badge {
+  @apply rounded-full bg-[#FEF9C3] px-2.5 py-1 text-xs font-bold text-[#713F12];
+}
+
+.app-header__avatar {
+  @apply grid h-9 w-9 place-content-center rounded-full bg-gray-200 text-xs font-bold text-gray-800;
+}
+
+.app-header__logout,
+.app-header__login {
+  @apply rounded-lg border border-gray-300 px-3 py-2 text-xs font-medium text-gray-700 transition hover:bg-gray-50;
+}
+
+.app-header__register {
+  @apply rounded-lg bg-[#D32F2F] px-3 py-2 text-xs font-semibold text-white transition hover:bg-[#B71C1C];
+}
