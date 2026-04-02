@@ -2,13 +2,16 @@
 
 namespace App\Listeners;
 
-use App\Events\OrderCreated;
+use App\Events\CheckoutCompleted;
 use App\Jobs\SendOrderEmailJob;
 
 class SendOrderConfirmationEmail
 {
-    public function handle(OrderCreated $event): void
+    /**
+     * Un solo correo con el pedido completo (todas las líneas del carrito).
+     */
+    public function handle(CheckoutCompleted $event): void
     {
-        SendOrderEmailJob::dispatch($event->order);
+        SendOrderEmailJob::dispatch($event->orders->pluck('id')->values()->all());
     }
 }

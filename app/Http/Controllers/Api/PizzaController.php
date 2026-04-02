@@ -16,8 +16,18 @@ class PizzaController extends Controller
     {
     }
 
-    public function index(){
-        $pizzas=Pizza::with('ingredients')->get();
+    public function index(Request $request){
+        $query = Pizza::with('ingredients');
+
+        // Búsqueda por nombre
+        if ($request->has('search') && !empty($request->search)) {
+            $query->where('name', 'like', '%' . $request->search . '%');
+        }
+
+        // Paginación
+        $perPage = $request->get('per_page', 10);
+        $pizzas = $query->paginate($perPage);
+
         return response()->json($pizzas);
     }
 

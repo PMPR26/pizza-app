@@ -115,4 +115,9 @@ return [
         'name' => env('MAIL_FROM_NAME', env('APP_NAME', 'Laravel')),
     ],
 
+    /*
+    | Opcional: recibe copia (BCC) de cada confirmación de pedido (ej. correo del local).
+    */
+    'order_bcc' => env('MAIL_ORDER_BCC'),
+
 ];

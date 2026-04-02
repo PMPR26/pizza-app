@@ -2,7 +2,7 @@
 
 namespace App\Providers;
 
-use App\Events\OrderCreated;
+use App\Events\CheckoutCompleted;
 use App\Listeners\SendOrderConfirmationEmail;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
@@ -22,6 +22,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        Event::listen(OrderCreated::class, SendOrderConfirmationEmail::class);
+        Event::listen(CheckoutCompleted::class, SendOrderConfirmationEmail::class);
     }
 }
